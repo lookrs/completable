@@ -22,11 +22,15 @@ public class Main {
                 .thenApplyAsync(res -> testService.run(res).join())
         ).toList();
 
-        List<String> results = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> futures.stream()
-                        .map(CompletableFuture::join)
-                        .collect(Collectors.toList()))
-                .join();
+//        List<String> results = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+//                .thenApply(v -> futures.stream()
+//                        .map(x-> {
+//                            log.info(Thread.currentThread().getName());
+//                           return x.join();
+//                        })
+//                        .collect(Collectors.toList()))
+//                .join();
+        List<String> results = futures.stream().map(CompletableFuture::join).toList();
         results.forEach(log::info);
     }
 }
