@@ -30,7 +30,7 @@ public class Main {
             finishedFlag.set(true);
         });
         List<CompletableFuture<Integer>> executeResult = new ArrayList<>(filePrefix.size());
-        while (!filesQueue.isEmpty() || !finishedFlag.get()){
+        while (!filesQueue.isEmpty() || !finishedFlag.get()) {
             try {
                 String take = filesQueue.take();
                 CompletableFuture<Integer> resultStatusFuture = Test0043AsynService.run(take);
@@ -39,7 +39,19 @@ public class Main {
                 throw new RuntimeException(e);
             }
         }
+//        List<CompletableFuture<Integer>> executeResult =
+//                filePrefix.stream().map(fileInfo -> CompletableFuture.supplyAsync(
+//                                () -> Test0043AsynService.runReceiveFile(fileInfo)
+//                                        .join())
+//                        .thenApplyAsync(receiveFile -> Test0043AsynService.run(receiveFile)
+//                                .join())
+//                ).toList();
+
         List<Integer> finalResult = executeResult.stream().map(CompletableFuture::join).toList();
         System.out.println("finalResult = " + finalResult);
+        Thread.getAllStackTraces().keySet().forEach(thread ->
+                System.out.println(thread.getName() + " - Daemon: " + thread.isDaemon())
+        );
+//        context.close();
     }
 }

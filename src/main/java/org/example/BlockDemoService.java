@@ -13,7 +13,7 @@ public class BlockDemoService {
         // 模拟耗时
         try {
             System.out.println(Thread.currentThread().getName() + " 按前缀取文件 " + filePrefix);
-            Thread.sleep(5000);
+            Thread.sleep(2000);
             System.out.println(Thread.currentThread().getName() + " 按前缀取文件 " + filePrefix + " 完成 ");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -26,7 +26,7 @@ public class BlockDemoService {
         // 模拟耗时
         try {
             System.out.println(Thread.currentThread().getName() + " 处理文件 " + fileName);
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             System.out.println(Thread.currentThread().getName() + " 处理文件 " + fileName + " 完成 ");
         } catch (InterruptedException e) {
             return CompletableFuture.completedFuture(100);
