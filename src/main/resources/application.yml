@@ -1,4 +1,9 @@
 spring:
-  application:
-    name: demo
-
+  datasource:
+    url: jdbc:postgresql://192.168.10.107:5432/meta
+    username: postgres
+    password: admin123
+    driver-class-name: org.postgresql.Driver
+  batch:
+    jdbc:
+      initialize-schema: ALWAYS

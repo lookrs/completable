@@ -34,11 +34,11 @@ public class TestService {
     }
 
 
-    @Async("poolB")
+    @Async
     CompletableFuture<String> run(String taskRes) {
         log.info("taskRes = " + taskRes + ",thread: " + Thread.currentThread().getName());
         try {
-            Thread.sleep(8000);
+            Thread.sleep(2000);
             log.info(taskRes + " 完成,thread: " + Thread.currentThread().getName());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
