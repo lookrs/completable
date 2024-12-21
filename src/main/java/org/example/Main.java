@@ -5,32 +5,41 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SpringBootApplication
 @Log4j2
 public class Main {
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(Main.class, args);
-        TestService testService = context.getBean(TestService.class);
-        List<String> tasks = testService.getTasks();
+        BlockDemoService Test0043AsynService = context.getBean(BlockDemoService.class);
+        List<String> filePrefix = List.of("target_file_001", "target_file_002", "target_file_003", "target_file_004",
+                "target_file_005",
+                "target_file_006", "target_file_007", "target_file_008");
+        ArrayBlockingQueue<String> filesQueue = new ArrayBlockingQueue<>(filePrefix.size());
+        AtomicBoolean finishedFlag = new AtomicBoolean(false);
+        List<CompletableFuture<String>> receiveFilesFuture =
+                filePrefix.stream().map(file -> Test0043AsynService.runReceiveFile(file)).toList();
 
-        List<CompletableFuture<String>> futures = tasks.stream().map(task -> CompletableFuture.supplyAsync(
-                        () -> testService.runRec(task).join())
-                .thenApplyAsync(res -> testService.run(res).join())
-        ).toList();
-
-//        List<String> results = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-//                .thenApply(v -> futures.stream()
-//                        .map(x-> {
-//                            log.info(Thread.currentThread().getName());
-//                           return x.join();
-//                        })
-//                        .collect(Collectors.toList()))
-//                .join();
-        List<String> results = futures.stream().map(CompletableFuture::join).toList();
-        results.forEach(log::info);
+        CompletableFuture.runAsync(() -> {
+            receiveFilesFuture.forEach(thread -> filesQueue.add(thread.join()));
+            finishedFlag.set(true);
+        });
+        List<CompletableFuture<Integer>> executeResult = new ArrayList<>(filePrefix.size());
+        while (!filesQueue.isEmpty() || !finishedFlag.get()){
+            try {
+                String take = filesQueue.take();
+                CompletableFuture<Integer> resultStatusFuture = Test0043AsynService.run(take);
+                executeResult.add(resultStatusFuture);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        List<Integer> finalResult = executeResult.stream().map(CompletableFuture::join).toList();
+        System.out.println("finalResult = " + finalResult);
     }
 }
